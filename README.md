@@ -7,12 +7,14 @@
 1. [python3.8](https://www.python.org/downloads/) `Windows x86-64 executable installer`
 	설치시 `add python to path`에 체크하는게 편한 것 같다
 2. [tesseract for window](https://github.com/UB-Mannheim/tesseract/wiki) `tesseract-ocr-w64-setup-v5.0.0-alpha.20200328.exe`
-3. [git](https://git-scm.com/) for windows
+3. [chrimedriver](https://chromedriver.chromium.org/downloads)
+	로컬에 설치된 크롬버전과 맞아야 하는 것 같다.
+4. [git](https://git-scm.com/) for windows
 	소스코드 버전관리 목적
-4. [vscode](https://code.visualstudio.com/)
+5. [vscode](https://code.visualstudio.com/)
 	소스코드 편집기
-5. [Typora](https://typora.io/) 마크다운 편집기 (선택)
-5. `pip install -r requirements.txt`
+6. [Typora](https://typora.io/) 마크다운 편집기 (선택)
+7. `pip install -r requirements.txt`
 	의존성 모듈 설치. 최초 1회 실행.
 
 ### 2. 환경변수 설정
