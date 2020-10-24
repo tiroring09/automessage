@@ -1,0 +1,7 @@
+__pycache__
+venv
+.env
+
+chromedriver.exe
+
+샘플사진
