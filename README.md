@@ -44,6 +44,7 @@
 
 ### 4. 메세지 자동화
 `python src/auto_message.py`
+> **작업 취소하는 방법: `ctrl + c` 누르세요!!!**
 
 전처리 결과물을 가지고, 쇼피에 접속하여 `order_id`별로 지정된 메세지와 사진파일을 전송한다.
 
@@ -148,7 +149,8 @@ https://github.com/UB-Mannheim/tesseract/wiki
 https://pypi.org/project/pytesseract
 
 > We don't provide an installer for Tesseract 4.1.0 because we think that the latest version 5.0.0-alpha is better for most Windows users in many aspects (functionality, speed, stability). Version 4.1 is only needed for people who develop software based on the Tesseract API and who need 100 % API compatibility with version 4.0.
->> 대충 4.1말고 5.0버전 쓰라는 뜻
+>
+> > 대충 4.1말고 5.0버전 쓰라는 뜻
 
 그럼 pytesseract와 5.0이 잘 호환되는지 체크해야 할듯. 잘되겠지뭐.
 
