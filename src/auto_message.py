@@ -13,11 +13,14 @@ from os.path import join, isfile
 
 #####################CONSTANTS###########################
 MESSAGE = '''
-
+예시 메세지 입니다.
 '''
 
 WORK_DIR = config('WORK_DIR')
 RESULT_DIR = join(WORK_DIR, 'preprocess')
+
+# SG, PH, MY, ID 중 하나
+TARGET_NATION = config('TARGET_NATION')
 
 NATION = {
     'SG': {
@@ -73,58 +76,53 @@ ordergroup = load_preprocessed_image_group(RESULT_DIR)
 # 크롬브라우저 열기
 browser = webdriver.Chrome()
 
-for key in NATION:
-    loginURL = NATION[key]['HOST'] + LOGIN_URL
-    searchURL = NATION[key]['HOST'] + SEARCH_URL
-    ID = NATION[key]['ID']
-    PW = NATION[key]['PW']
+# 국가를 정하고, 국가에 맞는 주소, 아이디, 비밀번호 로드
+TARGET_N = NATION[TARGET_NATION]
+loginURL = TARGET_N['HOST'] + LOGIN_URL
+searchURL = TARGET_N['HOST'] + SEARCH_URL
+ID = TARGET_N['ID']
+PW = TARGET_N['PW']
 
-    browser.get(loginURL)
-    sleep(1)
+browser.get(loginURL)
+sleep(1)
 
-    # 로그인
-    form_elements = browser.find_elements_by_css_selector('input')
-    ID_form = form_elements[0]
-    PW_form = form_elements[1]
+# 로그인
+form_elements = browser.find_elements_by_css_selector('input')
+ID_form = form_elements[0]
+PW_form = form_elements[1]
 
-    ID_form.send_keys(ID)
-    PW_form.send_keys(PW)
+ID_form.send_keys(ID)
+PW_form.send_keys(PW)
 
-    button = browser.find_element_by_css_selector('button')
-    button.click()
+button = browser.find_element_by_css_selector('button')
+button.click()
+sleep(3)
+
+for og in ordergroup:
+    order_id = og[0].split('.')[0]
+
+    # order id 검색
+    browser.get(searchURL + order_id)
     sleep(3)
 
-    for og in ordergroup:
-        order_id = og[0].split('.')[0]
+    # 채팅창 띄우기
+    btn_xpath = '//*[@id="app"]/div[2]/div[2]/div/div/div/div/div[3]/div/div[2]/a/div[1]/div[1]/div/div[3]'
+    browser.find_element_by_xpath(btn_xpath).click()
+    sleep(3)
 
-        # order id 검색
-        browser.get(searchURL + order_id)
-        sleep(3)
+    # 사진 전송
+    # for img in og:
+    #     img = join(RESULT_DIR, img)
 
-        # 채팅창 띄우기
-        btn_xpath = '//*[@id="app"]/div[2]/div[2]/div/div/div/div/div[3]/div/div[2]/a/div[1]/div[1]/div/div[3]'
-        browser.find_element_by_xpath(btn_xpath).click()
-        # browser.find_element_by_css_selector('.chat-solid').click()
-        sleep(3)
+    #     img_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[2]/div/div/div[2]/div/input'
+    #     browser.find_element_by_xpath(img_xpath).send_keys(img)
+    #     sleep(3)
 
-        # 사진 전송
-        # for img in og:
-        #     img = join(RESULT_DIR, img)
+    # 메세지 입력
+    # msg_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/textarea'
+    # browser.find_element_by_xpath(msg_xpath).send_keys(MESSAGE)
+    # sleep(3)
 
-        #     img_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[2]/div/div/div[2]/div/input'
-        #     browser.find_element_by_xpath(img_xpath).send_keys(img)
-        #     sleep(3)
-        
-        # 사진 전송 또 다른 방법
-        # 사진 전송 폼 pyautogui 사용하기
-        # img_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[2]/div/div/div[2]/div'
-        # browser.find_element_by_xpath(img_xpath).click()
-
-        # 메세지 입력
-        # msg_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/textarea'
-        # browser.find_element_by_xpath(msg_xpath).send_keys(MESSAGE)
-        # sleep(3)
-
-        # 전송버튼
-        # send_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/div'
-        # browser.find_element_by_xpath(send_xpath).click()
+    # 전송버튼
+    # send_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/div'
+    # browser.find_element_by_xpath(send_xpath).click()
