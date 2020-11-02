@@ -13,36 +13,55 @@ from os import listdir
 from os.path import join, isfile
 
 #####################CONSTANTS###########################
-MESSAGE = '''
-예시 메세지 입니다.
+# 이모티콘 쓰면 에러나요!
+SG_MESSAGE = '''
+✈SHIPPED OUT✈
+
+- Estimated delivery date : OCT 16~23
+- Request regarding delivery : Ninja Van(+65 6602 8271)
+
+Thank you so much and hope to meet you again
+'''
+
+PH_MESSAGE = '''
+
+'''
+
+MY_MESSAGE = '''
+
+'''
+
+ID_MESSAGE = '''
+
 '''
 
 WORK_DIR = config('WORK_DIR')
-RESULT_DIR = join(WORK_DIR, 'preprocess')
-
-# SG, PH, MY, ID 중 하나
-TARGET_NATION = config('TARGET_NATION')
+ROOT_RESULT_DIR = join(WORK_DIR, 'preprocess')
 
 NATION = {
     'SG': {
         'HOST': config('SHOPEE_HOST_SINGAPORE'),
         'ID': config('SHOPEE_ID_SINGAPORE'),
         'PW': config('SHOPEE_PW_SINGAPORE'),
+        'MESSAGE': SG_MESSAGE,
     },
     'PH': {
         'HOST': config('SHOPEE_HOST_PHILIPPINE'),
         'ID': config('SHOPEE_ID_PHILIPPINE'),
         'PW': config('SHOPEE_PW_PHILIPPINE'),
+        'MESSAGE': PH_MESSAGE,
     },
     'MY': {
         'HOST': config('SHOPEE_HOST_MALAYSIA'),
         'ID': config('SHOPEE_ID_MALAYSIA'),
         'PW': config('SHOPEE_PW_MALAYSIA'),
+        'MESSAGE': MY_MESSAGE,
     },
     'ID': {
         'HOST': config('SHOPEE_HOST_INDONESIA'),
         'ID': config('SHOPEE_ID_INDONESIA'),
         'PW': config('SHOPEE_PW_INDONESIA'),
+        'MESSAGE': ID_MESSAGE,
     },
 }
 
@@ -75,76 +94,78 @@ def send_keys_by_line(elmt, text):
 
 
 
-
-# 디렉토리로부터 파일목록 로드
-ordergroup = load_preprocessed_image_group(RESULT_DIR)
-
 # 크롬브라우저 열기
 browser = webdriver.Chrome()
 
-# 국가를 정하고, 국가에 맞는 주소, 아이디, 비밀번호 로드
-TARGET_N = NATION[TARGET_NATION]
-loginURL = TARGET_N['HOST'] + LOGIN_URL
-searchURL = TARGET_N['HOST'] + SEARCH_URL
-ID = TARGET_N['ID']
-PW = TARGET_N['PW']
+for TARGET_NATION in NATION.keys():
+    RESULT_DIR = join(ROOT_RESULT_DIR, TARGET_NATION)
 
-browser.get(loginURL)
-sleep(1)
+    # 디렉토리로부터 파일목록 로드
+    ordergroup = load_preprocessed_image_group(RESULT_DIR)
 
-# 로그인
-form_elements = browser.find_elements_by_css_selector('input')
-ID_form = form_elements[0]
-PW_form = form_elements[1]
+    # 국가를 정하고, 국가에 맞는 주소, 아이디, 비밀번호 로드
+    TARGET_N = NATION[TARGET_NATION]
+    loginURL = TARGET_N['HOST'] + LOGIN_URL
+    searchURL = TARGET_N['HOST'] + SEARCH_URL
+    ID = TARGET_N['ID']
+    PW = TARGET_N['PW']
 
-ID_form.send_keys(ID)
-PW_form.send_keys(PW)
+    browser.get(loginURL)
+    sleep(1)
 
-button = browser.find_element_by_css_selector('button')
-button.click()
-sleep(3)
+    # 로그인
+    form_elements = browser.find_elements_by_css_selector('input')
+    ID_form = form_elements[0]
+    PW_form = form_elements[1]
 
-for og in ordergroup:
-    order_id = og[0].split('.')[0]
+    ID_form.send_keys(ID)
+    PW_form.send_keys(PW)
 
-    # order id 검색
-    browser.get(searchURL + order_id)
+    button = browser.find_element_by_css_selector('button')
+    button.click()
     sleep(3)
 
-    btn_xpath = '//*[@id="app"]/div[2]/div[2]/div/div/div/div/div[3]/div/div[2]/a/div[1]/div[1]/div/div[3]'
-    # 페이지 로딩 제대로 되었는지 체크, 오류시 새로고침 (최대 50회)
-    err_cnt = 0
-    while True:
-        try:
-            browser.find_element_by_xpath(btn_xpath)
-        except:
-            browser.refresh()
-            sleep(3)
-            err_cnt += 1
-            if err_cnt > 50:
-                raise Exception('페이지 새로고침 제한 초과: ' + str(err_cnt))
-        else:
-            break
+    for og in ordergroup:
+        order_id = og[0].split('.')[0]
 
-    # 채팅창 띄우기
-    browser.find_element_by_xpath(btn_xpath).click()
-    sleep(3)
+        # order id 검색
+        browser.get(searchURL + order_id)
+        sleep(3)
 
-    # 사진 전송
-    # for img in og:
-    #     img = join(RESULT_DIR, img)
+        btn_xpath = '//*[@id="app"]/div[2]/div[2]/div/div/div/div/div[3]/div/div[2]/a/div[1]/div[1]/div/div[3]'
+        # 페이지 로딩 제대로 되었는지 체크, 오류시 새로고침 (최대 50회)
+        err_cnt = 0
+        while True:
+            try:
+                browser.find_element_by_xpath(btn_xpath)
+            except:
+                browser.refresh()
+                sleep(3)
+                err_cnt += 1
+                if err_cnt > 50:
+                    raise Exception('페이지 새로고침 제한 초과: ' + str(err_cnt))
+            else:
+                break
 
-    #     img_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[2]/div/div/div[2]/div/input'
-    #     browser.find_element_by_xpath(img_xpath).send_keys(img)
-    #     sleep(3)
+        # 채팅창 띄우기
+        browser.find_element_by_xpath(btn_xpath).click()
+        sleep(3)
 
-    # 메세지 입력
-    # msg_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/textarea'
-    # message_elmt = browser.find_element_by_xpath(msg_xpath)
-    # send_keys_by_line(message_elmt, MESSAGE)
-    # sleep(3)
+        # 사진 전송
+        # for img in og:
+        #     img = join(RESULT_DIR, img)
 
-    # 전송버튼
-    # send_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/div'
-    # browser.find_element_by_xpath(send_xpath).click()
-    # sleep(3)
+        #     img_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[2]/div/div/div[2]/div/input'
+        #     browser.find_element_by_xpath(img_xpath).send_keys(img)
+        #     sleep(3)
+
+        # 메세지 입력
+        # msg_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/textarea'
+        # message_elmt = browser.find_element_by_xpath(msg_xpath)
+        # send_keys_by_line(message_elmt, MESSAGE)
+        # sleep(3)
+
+        # 전송버튼
+        # send_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/div'
+        # browser.find_element_by_xpath(send_xpath).click()
+        # sleep(3)
