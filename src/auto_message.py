@@ -111,8 +111,22 @@ for og in ordergroup:
     browser.get(searchURL + order_id)
     sleep(3)
 
-    # 채팅창 띄우기
     btn_xpath = '//*[@id="app"]/div[2]/div[2]/div/div/div/div/div[3]/div/div[2]/a/div[1]/div[1]/div/div[3]'
+    # 페이지 로딩 제대로 되었는지 체크, 오류시 새로고침 (최대 50회)
+    err_cnt = 0
+    while True:
+        try:
+            browser.find_element_by_xpath(btn_xpath)
+        except:
+            browser.refresh()
+            sleep(3)
+            err_cnt += 1
+            if err_cnt > 50:
+                raise Exception('페이지 새로고침 제한 초과: ' + str(err_cnt))
+        else:
+            break
+
+    # 채팅창 띄우기
     browser.find_element_by_xpath(btn_xpath).click()
     sleep(3)
 
@@ -133,3 +147,4 @@ for og in ordergroup:
     # 전송버튼
     # send_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/div'
     # browser.find_element_by_xpath(send_xpath).click()
+    # sleep(3)
