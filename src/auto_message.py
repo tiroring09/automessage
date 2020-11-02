@@ -5,6 +5,7 @@ string Template 사용하여 interpolation 이쁘게 하기
 from sel03.py
 '''
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from decouple import config
 from time import sleep
 from string import Template
@@ -65,7 +66,12 @@ def load_preprocessed_image_group(RESULT_DIR):
     
     return filegroup
 
-
+def send_keys_by_line(elmt, text):
+    lines = text.strip().split('\n')
+    for i, l in enumerate(lines):
+        elmt.send_keys(l)
+        if i != len(lines)-1:
+            elmt.send_keys(Keys.SHIFT, Keys.ENTER)
 
 
 
@@ -120,7 +126,8 @@ for og in ordergroup:
 
     # 메세지 입력
     # msg_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/textarea'
-    # browser.find_element_by_xpath(msg_xpath).send_keys(MESSAGE)
+    # message_elmt = browser.find_element_by_xpath(msg_xpath)
+    # send_keys_by_line(message_elmt, MESSAGE)
     # sleep(3)
 
     # 전송버튼
