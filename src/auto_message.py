@@ -1,16 +1,10 @@
-'''
-셀레니움 설치 및 최초 실행
-config 불러와서 로그인하기
-string Template 사용하여 interpolation 이쁘게 하기
-from sel03.py
-'''
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from decouple import config
 from time import sleep
 from string import Template
-from os import listdir
-from os.path import join, isfile
+from os import listdir, remove
+from os.path import join, isfile, exists
 
 #####################CONSTANTS###########################
 # 이모티콘 쓰면 에러나요!
@@ -65,7 +59,6 @@ NATION = {
     },
 }
 
-# searchURL = Template('https://seller.shopee.sg/portal/sale?search=$ORDER_ID')
 LOGIN_URL = '/account/signin'
 SEARCH_URL = '/portal/sale?search='
 #####################CONSTANTS###########################END
@@ -97,21 +90,23 @@ def send_keys_by_line(elmt, text):
 # 크롬브라우저 열기
 browser = webdriver.Chrome()
 
+# 국가 순회
 for TARGET_NATION in NATION.keys():
     RESULT_DIR = join(ROOT_RESULT_DIR, TARGET_NATION)
 
     # 디렉토리로부터 파일목록 로드
     ordergroup = load_preprocessed_image_group(RESULT_DIR)
 
-    # 국가를 정하고, 국가에 맞는 주소, 아이디, 비밀번호 로드
+    # 국가를 정하고, 국가에 맞는 주소, 로그인 정보 로드
     TARGET_N = NATION[TARGET_NATION]
     loginURL = TARGET_N['HOST'] + LOGIN_URL
     searchURL = TARGET_N['HOST'] + SEARCH_URL
     ID = TARGET_N['ID']
     PW = TARGET_N['PW']
+    MESSAGE = TARGET_N['MESSAGE']
 
     browser.get(loginURL)
-    sleep(1)
+    sleep(2)
 
     # 로그인
     form_elements = browser.find_elements_by_css_selector('input')
@@ -133,7 +128,7 @@ for TARGET_NATION in NATION.keys():
         sleep(3)
 
         btn_xpath = '//*[@id="app"]/div[2]/div[2]/div/div/div/div/div[3]/div/div[2]/a/div[1]/div[1]/div/div[3]'
-        # 페이지 로딩 제대로 되었는지 체크, 오류시 새로고침 (최대 50회)
+        # 페이지 로딩 제대로 되었는지 체크, 오류시 새로고침 (최대 15회)
         err_cnt = 0
         while True:
             try:
@@ -142,30 +137,36 @@ for TARGET_NATION in NATION.keys():
                 browser.refresh()
                 sleep(3)
                 err_cnt += 1
-                if err_cnt > 50:
+                if err_cnt > 15:
                     raise Exception('페이지 새로고침 제한 초과: ' + str(err_cnt))
             else:
                 break
 
         # 채팅창 띄우기
         browser.find_element_by_xpath(btn_xpath).click()
-        sleep(3)
+        sleep(2)
 
         # 사진 전송
-        # for img in og:
-        #     img = join(RESULT_DIR, img)
+        for img in og:
+            img = join(RESULT_DIR, img)
 
-        #     img_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[2]/div/div/div[2]/div/input'
-        #     browser.find_element_by_xpath(img_xpath).send_keys(img)
-        #     sleep(3)
+            img_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[2]/div/div/div[2]/div/input'
+            browser.find_element_by_xpath(img_xpath).send_keys(img)
+            sleep(2)
+
+        # 사진전송 완료시 해당 파일 삭제
+        for img in og:
+            img = join(RESULT_DIR, img)
+            if exists(img):
+                remove(img)
 
         # 메세지 입력
-        # msg_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/textarea'
-        # message_elmt = browser.find_element_by_xpath(msg_xpath)
-        # send_keys_by_line(message_elmt, MESSAGE)
-        # sleep(3)
+        msg_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/textarea'
+        message_elmt = browser.find_element_by_xpath(msg_xpath)
+        send_keys_by_line(message_elmt, MESSAGE)
+        sleep(2)
 
         # 전송버튼
-        # send_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/div'
-        # browser.find_element_by_xpath(send_xpath).click()
-        # sleep(3)
+        send_xpath = '//*[@id="shopee-mini-chat-embedded"]/div[1]/div[2]/div[1]/div[3]/div/div/div[1]/div/div'
+        browser.find_element_by_xpath(send_xpath).click()
+        sleep(2)
